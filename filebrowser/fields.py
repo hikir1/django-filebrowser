@@ -147,7 +147,6 @@ class FileBrowseUploadWidget(Input):
         self.extensions = attrs.get('extensions', '')
         self.format = attrs.get('format', '')
         self.upload_to = attrs.get('upload_to', '')
-        self.temp_upload_dir = attrs.get('temp_upload_dir', '')
         if attrs is not None:
             self.attrs = attrs.copy()
         else:
@@ -166,8 +165,7 @@ class FileBrowseUploadWidget(Input):
         final_attrs['directory'] = self.directory
         final_attrs['extensions'] = self.extensions
         final_attrs['format'] = self.format
-        final_attrs['upload_to'] = self.upload_to
-        final_attrs['temp_upload_dir'] = UPLOAD_TEMPDIR
+        final_attrs['upload_to'] = self.upload_to or UPLOAD_TEMPDIR
         final_attrs['ADMIN_THUMBNAIL'] = ADMIN_THUMBNAIL
         if value != "":
             try:
@@ -183,7 +181,7 @@ class FileBrowseUploadFormField(forms.CharField):
         'extension': _(u'Extension %(ext)s is not allowed. Only %(allowed)s is allowed.'),
     }
 
-    def __init__(self, max_length=None, min_length=None, site=None, directory=None, extensions=None, format=None, upload_to=None, temp_upload_dir=None, *args, **kwargs):
+    def __init__(self, max_length=None, min_length=None, site=None, directory=None, extensions=None, format=None, upload_to=None, *args, **kwargs):
         self.max_length, self.min_length = max_length, min_length
         self.site = site
         self.directory = directory
@@ -192,7 +190,6 @@ class FileBrowseUploadFormField(forms.CharField):
             self.format = format or ''
             self.extensions = extensions or EXTENSIONS.get(format)
         self.upload_to = upload_to
-        self.temp_upload_dir = temp_upload_dir
         super(FileBrowseUploadFormField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
@@ -220,7 +217,6 @@ class FileBrowseUploadField(CharField):
         self.extensions = kwargs.pop('extensions', '')
         self.format = kwargs.pop('format', '')
         self.upload_to = kwargs.pop('upload_to', '')
-        self.temp_upload_dir = kwargs.pop('temp_upload_dir', '')
         return super(FileBrowseUploadField, self).__init__(*args, **kwargs)
 
     def from_db_value(self, value, expression, connection):
@@ -249,7 +245,6 @@ class FileBrowseUploadField(CharField):
         attrs["extensions"] = self.extensions
         attrs["format"] = self.format
         attrs["upload_to"] = self.upload_to
-        attrs["temp_upload_dir"] = self.temp_upload_dir
         defaults = {
             'form_class': FileBrowseUploadFormField,
             'widget': FileBrowseUploadWidget(attrs=attrs),
@@ -258,7 +253,6 @@ class FileBrowseUploadField(CharField):
             'extensions': self.extensions,
             'format': self.format,
             'upload_to': self.upload_to,
-            'temp_upload_dir': self.temp_upload_dir
         }
         return super(FileBrowseUploadField, self).formfield(**defaults)
 
